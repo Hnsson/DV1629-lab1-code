@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define SIZE 5
+#define SIZE 1024
 
 static double a[SIZE][SIZE];
 static double b[SIZE][SIZE];
