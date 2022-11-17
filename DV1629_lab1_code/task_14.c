@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define SIZE 1024
+#define SIZE 5
 
 static double a[SIZE][SIZE];
 static double b[SIZE][SIZE];
@@ -98,8 +98,8 @@ int main() {
     init_matrix_par();
 
     // matmul_seq();
-    matmul_par();
+    // matmul_par();
 
-    // print_matrix();
+    print_matrix();
     return 0;
 }

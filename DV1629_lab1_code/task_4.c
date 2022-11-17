@@ -111,6 +111,15 @@ void msgqsend() {
    printf("message queue: done sending messages.\n");
 }
 
+/*
+ * Function:  main 
+ * --------------------
+ * defintion: starts the msgqsend() function first, then after 1 second starts msgqrecv()
+ * function, this is because of msgqsend()'s need to "touch" msgq.txt, when starting
+ * wait for message queue to be ready, then input "ENTER" to continue
+ *
+ *  returns: value 0
+ */
 int main() {
     pid_t pid;
     pid = fork();
@@ -118,6 +127,7 @@ int main() {
     if(pid != 0) {
         msgqsend();
     } else {
+         /* Need to start send first, so wait 1 sec, then start recv */
         sleep(1);
         msgqrecv();
     }
