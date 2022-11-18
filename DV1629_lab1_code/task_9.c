@@ -7,12 +7,14 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 double bankAccountBalance = 0;
 
 void deposit(double amount) {
+    // Critical state with smallest time possible
     pthread_mutex_lock(&lock);
       bankAccountBalance += amount;
     pthread_mutex_unlock(&lock);
 }
 
 void withdraw(double amount) {
+    // Critical state with smallest time possible
     pthread_mutex_lock(&lock);
       bankAccountBalance -= amount;
     pthread_mutex_unlock(&lock);
@@ -25,6 +27,13 @@ unsigned odd(unsigned long num) {
 
 // simulate id performing 1000 transactions
 void do1000Transactions(unsigned long id) {
+    /*
+    * Critical section
+    The critical secition is closed of and controlled with the help
+    of mutex locks locking on and off while threads are inside
+    keeping the work only to one thread at a time, removing the
+    issue of data race condition.
+    */
     for (int i = 0; i < 1000; i++) {
         if (odd(id)) {
             deposit(100.00); // odd threads deposit
@@ -43,13 +52,6 @@ void* child(void* buf) {
 }
 
 int main(int argc, char** argv) {
-    /*
-    * Critical section
-    The critical secition is closed of and controlled with the help
-    of mutex locks locking on and off while threads are inside
-    keeping the work only to one thread at a time, removing the
-    issue of data race condition.
-    */
     int status;
 
     pthread_t *children;
