@@ -44,6 +44,7 @@ void msgqrecv() {
          exit(1);
       }
       toend = buf.mvalue;
+      // If value is -1, it means send has stopped broadcasting
       if (toend == -1)
         break;
       counter++;
@@ -75,7 +76,6 @@ void msgqsend() {
    }
 
    if ((msqid = msgget(key, PERMS | IPC_CREAT)) == -1) {
-
       perror("msgget");
       exit(1);
    }
@@ -85,29 +85,29 @@ void msgqsend() {
 
    int counter = 0;
 
+   // Wait for input, because we want the recv functions message queue to be ready
    char _;
    scanf("%c",&_);
+
    for(int i = 0; i < 50; i++) {
-        int res = rand() % 10;
+        // Random value to send
+        int res = rand();
         buf.mvalue = res;
 
-        printf("%d\n", buf.mvalue);
+        printf("\tsent: %d\n", buf.mvalue);
 
         len = sizeof(res);
-
+        // Send value to the message queue
         if (msgsnd(msqid, &buf, sizeof(buf.mvalue), 0) == -1)
             perror("msgsnd");
       counter++;
    }
-
+   // When done sending 50 random values, send -1 to finish of broadcast
    buf.mvalue = -1;
    len = sizeof(buf.mvalue);
    if (msgsnd(msqid, &buf, len, 0) == -1) /* +1 for '\0' */
       perror("msgsnd");
-   printf("\nItems sent: %d\nInput anything to continue: ", counter);
-
-   // Can fix with semaphores. recv post semaphore when all is done and send can continue
-  //  scanf("%c",&_);
+   printf("\nItems sent: %d\n", counter);
 
    printf("message queue: done sending messages.\n");
 }
@@ -116,8 +116,8 @@ void msgqsend() {
  * Function:  main
  * --------------------
  * defintion: starts the msgqsend() function first, then after 1 second starts msgqrecv()
- * function, this is because of msgqsend()'s need to "touch" msgq.txt, when starting
- * wait for message queue to be ready, then input "ENTER" to continue
+ * function, this is because of msgqsend()'s need to "touch" msgq.txt
+ * Headsup: when starting, wait for message queue to be ready, then input "ENTER" to continue
  *
  *  returns: value 0
  */
