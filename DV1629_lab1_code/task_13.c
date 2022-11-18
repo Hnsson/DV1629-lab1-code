@@ -8,6 +8,7 @@ static double a[SIZE][SIZE];
 static double b[SIZE][SIZE];
 static double c[SIZE][SIZE];
 
+// Init matrixes a and b setting them to 1:s
 static void init_matrix(void)
 {
     int i, j;
@@ -19,6 +20,7 @@ static void init_matrix(void)
         }
 }
 
+// Ordinary given sequencial matrix multiplication
 static void matmul_seq()
 {
     int i, j, k;
@@ -31,18 +33,19 @@ static void matmul_seq()
         }
     }
 }
-
+// Thread creation
 void* thread_matmul_matrix(void* buf) {
     unsigned long childID = (unsigned long)buf;
-
+    // Do the matrix multiplications on the row based on the given ID for the thread
     for (int j = 0; j < SIZE; j++) {
         c[childID][j] = 0.0;
         for (int k = 0; k < SIZE; k++)
             c[childID][j] = c[childID][j] + a[childID][k] * b[k][j];
     }
+    
     return NULL;
 }
-
+// Create all threads for the parallel matrix multiplications
 static void matmul_par()
 {
     pthread_t *children;
@@ -50,29 +53,35 @@ static void matmul_par()
     unsigned long nThreads = SIZE;
     children = malloc(nThreads * sizeof(pthread_t) );
 
+    // Do a loop for each child to create
     for (int i = 0; i < SIZE; i++) {
         pthread_create(&(children[i]), NULL, thread_matmul_matrix, (void*)(__intptr_t)i);
     }
 
+    // Await and resynchronize with all threads
     for (int i = 0; i < SIZE; i++) {
         pthread_join(children[i], NULL);
     }
 }
 
+// Print finished matrix
 static void print_matrix(void)
 {
     int i, j;
 
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++)
+            // Print out each cell in the 2D array (matrix)
 	        printf(" %7.2f", c[i][j]);
 	    printf("\n");
     }
 }
 
 int main() {
+    // INIT MATRIX
     init_matrix();
     
+    // MATRIX MULTIPLICATION SEQ + PAR
     // matmul_seq();
     matmul_par();
 
