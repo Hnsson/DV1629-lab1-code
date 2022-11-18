@@ -9,8 +9,11 @@ struct threadArgs {
 };
 
 void* child(void* params) {
+	// Get settings from param
 	struct threadArgs *args = (struct threadArgs*) params;
+	// Get id from setting
 	unsigned int childID = args->id;
+	// Update struct squareID 
     args->squaredId = childID * childID;
 	unsigned int numThreads = args->numThreads;
 	printf("Greetings from child #%u of %u\n", childID, numThreads);
@@ -38,7 +41,9 @@ int main(int argc, char** argv) {
 	}
 	printf("I am the parent (main) thread.\n");
 	for (unsigned int id = 0; id < numThreads; id++) {
+		// Wait and resynchronize with thread
 		pthread_join(children[id], NULL);
+		// Print out given squaredID from the specific threads struct
         printf("\n%d\n", args[id].squaredId);
 	}
 	free(args); // deallocate args vector
