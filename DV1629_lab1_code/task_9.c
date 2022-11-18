@@ -7,11 +7,15 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 double bankAccountBalance = 0;
 
 void deposit(double amount) {
-    bankAccountBalance += amount;
+    pthread_mutex_lock(&lock);
+      bankAccountBalance += amount;
+    pthread_mutex_unlock(&lock);
 }
 
 void withdraw(double amount) {
-    bankAccountBalance -= amount;
+    pthread_mutex_lock(&lock);
+      bankAccountBalance -= amount;
+    pthread_mutex_unlock(&lock);
 }
 
 // utility function to identify even-odd numbers
@@ -23,17 +27,13 @@ unsigned odd(unsigned long num) {
 void do1000Transactions(unsigned long id) {
     for (int i = 0; i < 1000; i++) {
         if (odd(id)) {
-            pthread_mutex_lock(&lock);
             deposit(100.00); // odd threads deposit
-            pthread_mutex_unlock(&lock);
         }
         else {
-            pthread_mutex_lock(&lock);
             withdraw(100.00); // even threads withdraw
-            pthread_mutex_unlock(&lock);
         }
     }
-    
+
 }
 
 void* child(void* buf) {
@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
     pthread_t *children;
     unsigned int id = 0;
     unsigned long nThreads = 0;
-    
+
     if (argc > 1)
         nThreads = atoi(argv[1]);
     children = malloc( nThreads * sizeof(pthread_t) );
-    
+
     for (id = 1; id < nThreads; id++)
         pthread_create(&(children[id-1]), NULL, child, (void *)(__intptr_t)id);
 
@@ -67,10 +67,10 @@ int main(int argc, char** argv) {
 
     for (id = 1; id < nThreads; id++)
         pthread_join(children[id-1], NULL);
-    
+
     printf("\nThe final account balance with %lu threads is $%.2f.\n\n", nThreads, bankAccountBalance);
     free(children);
     pthread_mutex_destroy(&lock);
-    
+
     return 0;
 }

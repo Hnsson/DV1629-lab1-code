@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <errno.h> 
+#include <errno.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@ void msgqrecv() {
       perror("ftok");
       exit(1);
    }
-    printf("RECV");
+
    if ((msqid = msgget(key, PERMS)) == -1) { /* connect to the queue */
       perror("msgget");
       exit(1);
@@ -47,11 +47,17 @@ void msgqrecv() {
       if (toend == -1)
         break;
       counter++;
-      
+
       printf("recvd: \"%d\"\n", buf.mvalue);
    }
    printf("\nItems recieved: %d\n", counter);
    printf("message queue: done receiving messages.\n");
+
+   if (msgctl(msqid, IPC_RMID, NULL) == -1) {
+      perror("msgctl");
+      exit(1);
+   }
+
    system("rm msgq.txt");
 }
 
@@ -67,7 +73,7 @@ void msgqsend() {
       perror("ftok");
       exit(1);
    }
-      printf("SEND");
+
    if ((msqid = msgget(key, PERMS | IPC_CREAT)) == -1) {
 
       perror("msgget");
@@ -76,7 +82,7 @@ void msgqsend() {
    printf("message queue: ready to send messages.\n");
    printf("Enter lines of text, ^D to quit:\n");
    buf.mtype = 1; /* we don't really care in this case */
-   
+
    int counter = 0;
 
    char _;
@@ -89,7 +95,7 @@ void msgqsend() {
 
         len = sizeof(res);
 
-        if (msgsnd(msqid, &buf, sizeof(buf.mvalue), 0) == -1) /* +1 for '\0' */
+        if (msgsnd(msqid, &buf, sizeof(buf.mvalue), 0) == -1)
             perror("msgsnd");
       counter++;
    }
@@ -98,21 +104,16 @@ void msgqsend() {
    len = sizeof(buf.mvalue);
    if (msgsnd(msqid, &buf, len, 0) == -1) /* +1 for '\0' */
       perror("msgsnd");
-   printf("\nItems sent: %d\nInput anyting to continue: ", counter);
+   printf("\nItems sent: %d\nInput anything to continue: ", counter);
 
    // Can fix with semaphores. recv post semaphore when all is done and send can continue
-   scanf("%c",&_);
-
-   if (msgctl(msqid, IPC_RMID, NULL) == -1) {
-      perror("msgctl");
-      exit(1);
-   }
+  //  scanf("%c",&_);
 
    printf("message queue: done sending messages.\n");
 }
 
 /*
- * Function:  main 
+ * Function:  main
  * --------------------
  * defintion: starts the msgqsend() function first, then after 1 second starts msgqrecv()
  * function, this is because of msgqsend()'s need to "touch" msgq.txt, when starting

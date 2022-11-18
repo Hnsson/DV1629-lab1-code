@@ -98,8 +98,8 @@ int main() {
     init_matrix_par();
 
     // matmul_seq();
-    // matmul_par();
+    matmul_par();
 
-    print_matrix();
+    // print_matrix();
     return 0;
 }
