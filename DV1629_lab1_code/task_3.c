@@ -44,7 +44,7 @@ int main() {
 		/* here's the parent, acting as producer */
 		while (var1 < 100) {
 			/* write to shmem */
-			// Wait if semaphore equals 0, Thus the producer caught up with consumer
+			// Decrease value (write), if 0 (we've written up to the consumer, we wait)
 			sem_wait(sem_id1);
 			var1++;
 
@@ -55,7 +55,8 @@ int main() {
 
 			// Wait between 0.1 - 0.5s
 			sleep(((rand() %(5-1+1)+1)/10));
-
+			
+			// Post sem_id2 to increase semaphore value (allow it to start reading)
 			sem_post(sem_id2);
 		}
 
@@ -80,7 +81,7 @@ int main() {
             // Wait between 0.2 - 2.0s
             sleep(((rand() %(20-2+1)+2)/10));
 
-            // Post sem_id1 to decrease sem value
+            // Post sem_id1 to increase semaphore value (allow it to write more, can be up to 10, so if we read more, it is allowed to write more)
             sem_post(sem_id1);
 		}
 		shmdt(addr);
