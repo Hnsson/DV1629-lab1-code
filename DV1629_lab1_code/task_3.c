@@ -44,25 +44,25 @@ int main() {
 		/* here's the parent, acting as producer */
 		while (var1 < 100) {
 			/* write to shmem */
-      // Wait for semaphore to reach 0
-      sem_wait(sem_id1);
+			// Wait if semaphore equals 0, Thus the producer caught up with consumer
+			sem_wait(sem_id1);
 			var1++;
 
 			printf("Sending %d\n", var1); fflush(stdout);
-      shmp->buffer[shmp->end] = var1;
-      shmp->end++;
-      shmp->end %= 10;
+			shmp->buffer[shmp->end] = var1;
+			shmp->end++;
+			shmp->end %= 10;
 
-      // Wait between 0.1 - 0.5s
-      sleep(((rand() %(5-1+1)+1)/10));
+			// Wait between 0.1 - 0.5s
+			sleep(((rand() %(5-1+1)+1)/10));
 
-      sem_post(sem_id2);
+			sem_post(sem_id2);
 		}
 
 		shmdt(addr);
 		shmctl(shmid, IPC_RMID, shm_buf);
 
-    sem_close(sem_id1);
+    	sem_close(sem_id1);
 		sem_close(sem_id2);
 		wait(&status);
 		sem_unlink(semName1);
@@ -70,7 +70,6 @@ int main() {
 	} else {
 		/* here's the child, acting as consumer */
 		while (var2 < 100) {
-			/* read from shmem */
 			sem_wait(sem_id2);
 
             var2 = shmp->buffer[shmp->start];
@@ -87,7 +86,7 @@ int main() {
 		shmdt(addr);
 		shmctl(shmid, IPC_RMID, shm_buf);
 
-    sem_close(sem_id1);
+    	sem_close(sem_id1);
 		sem_close(sem_id2);
 	}
 
